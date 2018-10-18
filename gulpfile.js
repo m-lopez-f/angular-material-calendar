@@ -1,7 +1,7 @@
 /* eslint-env node */
 var gulp = require("gulp");
 var sass = require("gulp-sass");
-var minifyCSS = require("gulp-minify-css");
+let cleanCSS = require('gulp-clean-css');
 var htmlmin = require("gulp-htmlmin");
 var autoprefixer = require("gulp-autoprefixer");
 var runSequence = require("run-sequence");
@@ -72,7 +72,7 @@ gulp.task("scss", function() {
         }))
         .pipe(gulp.dest("dist"))
         .pipe(gulp.dest(""))
-        .pipe(minifyCSS())
+        .pipe(cleanCSS())
         .pipe(rename({ suffix: ".min" }))
         .pipe(gulp.dest("dist"))
         .pipe(gulp.dest(""))
