@@ -1,16 +1,25 @@
 angular.module("materialCalendar", ["ngMaterial", "ngSanitize"]);
 
 angular.module("materialCalendar").constant("materialCalendar.config", {
-    version: "0.2.13",
+    version: "0.2.15",
     debug: document.domain.indexOf("localhost") > -1
 });
 
-angular.module("materialCalendar").config(["materialCalendar.config", "$logProvider", "$compileProvider", function (config, $logProvider, $compileProvider) {
-    if (config.debug) {
-        $logProvider.debugEnabled(false);
-        $compileProvider.debugInfoEnabled(false);
-    }
-}]);
+angular
+    .module("materialCalendar")
+    .config(
+        [
+            "materialCalendar.config",
+            "$logProvider",
+            "$compileProvider",
+            function (config, $logProvider, $compileProvider) {
+                if (config.debug) {
+                    $logProvider.debugEnabled(false);
+                    $compileProvider.debugInfoEnabled(false);
+                }
+            }
+        ]
+    );
 
 angular.module("materialCalendar").directive("compile", ["$compile", function ($compile) {
     return function(scope, element, attrs) {
@@ -31,8 +40,7 @@ angular.module("materialCalendar").service("materialCalendar.Calendar", [functio
     function Calendar(year, month, options) {
 
         var now = new Date();
-
-        this.setWeekStartsOn = function (i) {
+        this.setWeekStartsOn = (i) => {
             var d = parseInt(i || 0, 10);
             if (!isNaN(d) && d >= 0 && d <= 6) {
                 this.weekStartsOn = d;
@@ -42,7 +50,7 @@ angular.module("materialCalendar").service("materialCalendar.Calendar", [functio
             return this.weekStartsOn;
         };
 
-        this.setStartDateOfMonth = function (i) {
+        this.setStartDateOfMonth = (i) => {
             var d = parseInt(i || 1, 10);
             if (!isNaN(d) && d >= 1 && d <= 31) {
                 this.startDateOfMonth = d;
@@ -52,9 +60,9 @@ angular.module("materialCalendar").service("materialCalendar.Calendar", [functio
             return this.startDateOfMonth;
         };
 
-        this.setNoOfDays = function (i) {
+        this.setNoOfDays = (i) => {
             var d = parseInt(i || 0, 10);
-            if (!isNaN(d) && d > 0 ) {
+            if (!isNaN(d) && d > 0) {
                 this.noOfDays = d;
             } else {
                 this.noOfDays = 0;
@@ -70,7 +78,7 @@ angular.module("materialCalendar").service("materialCalendar.Calendar", [functio
         this.startDateOfMonth = this.setStartDateOfMonth(this.options.startDateOfMonth);
         this.noOfDays = this.setNoOfDays(this.options.noOfDays);
 
-        this.next = function () {
+        this.next = () => {
             if (this.start.getMonth() < 11) {
                 this.init(this.start.getFullYear(), this.start.getMonth() + 1);
                 return;
@@ -78,7 +86,7 @@ angular.module("materialCalendar").service("materialCalendar.Calendar", [functio
             this.init(this.start.getFullYear() + 1, 0);
         };
 
-        this.prev = function () {
+        this.prev = () => {
             if (this.month) {
                 this.init(this.start.getFullYear(), this.start.getMonth() - 1);
                 return;
@@ -87,8 +95,7 @@ angular.module("materialCalendar").service("materialCalendar.Calendar", [functio
         };
 
         // Month should be the javascript indexed month, 0 is January, etc.
-        this.init = function (year, month) {
-
+        this.init = (year, month) => {
             var now = new Date();
             this.year = angular.isDefined(year) ? year : now.getFullYear();
             this.month = angular.isDefined(month) ? month : now.getMonth();
@@ -104,21 +111,21 @@ angular.module("materialCalendar").service("materialCalendar.Calendar", [functio
             }
 
             // First day of calendar month.
-            if ( angular.isDefined(this.options.startDateOfMonth) ) {
+            if (angular.isDefined(this.options.startDateOfMonth)) {
                 this.start = new Date(this.year, this.month, this.startDateOfMonth);
             } else {
                 this.start = new Date(this.year, this.month, 1);
             }
 
             var date = angular.copy(this.start);
-            if ( date.getDate() === 1) {
-                while ( date.getDay() !== this.weekStartsOn) {
+            if (date.getDate() === 1) {
+                while (date.getDay() !== this.weekStartsOn) {
                     date.setDate(date.getDate() - 1);
                     monthLength++;
                 }
             }
 
-            if ( this.noOfDays !== 0) {
+            if (this.noOfDays !== 0) {
                 while (this.noOfDays % 7 !== 0) {
                     this.noOfDays++;
                 }
@@ -138,7 +145,7 @@ angular.module("materialCalendar").service("materialCalendar.Calendar", [functio
             this.weeks = [];
             for (var i = 0; i < monthLength; ++i) {
 
-                // Let's start a new week.
+                // Let"s start a new week.
                 if (i % 7 === 0) {
                     this.weeks.push([]);
                 }
@@ -167,299 +174,342 @@ angular.module("materialCalendar").service("MaterialCalendarData", [function () 
 
         this.data = {};
 
-        this.getDayKey = function(date) {
+        this.getDayKey = (date) => {
             return [date.getFullYear(), date.getMonth() + 1, date.getDate()].join("-");
         };
 
-        this.setDayContent = function(date, content) {
-            this.data[this.getDayKey(date)] = content || "";
+        this.setDayContent = (date, content) => {
+            this.data[this.getDayKey(date)] = content || ";
         };
     }
     return new CalendarData();
 }]);
 
-angular.module("materialCalendar").directive("calendarMd", ["$compile", "$parse", "$templateRequest", "$q", "materialCalendar.Calendar", "MaterialCalendarData", function ($compile, $parse, $templateRequest, $q, Calendar, CalendarData) {
+angular
+    .module("materialCalendar")
+    .directive(
+        "calendarMd",
+        [
+            "$compile",
+            "$parse",
+            "$templateRequest",
+            "$q",
+            "materialCalendar.Calendar",
+            "MaterialCalendarData",
+            function (
+                $compile,
+                $parse,
+                $templateRequest,
+                $q,
+                Calendar,
+                CalendarData
+            ) {
 
-    var defaultTemplate = "/* angular-material-calendar.html */";
+                var defaultTemplate = "/* angular-material-calendar.html */";
 
-    var injectCss = function () {
-        var styleId = "calendarMdCss";
-        if (!document.getElementById(styleId)) {
-            var head = document.getElementsByTagName("head")[0];
-            var css = document.createElement("style");
-            css.type = "text/css";
-            css.id = styleId;
-            css.innerHTML = "/* angular-material-calendar.css */";
-            head.insertBefore(css, head.firstChild);
-        }
-    };
+                var injectCss = function () {
+                    var styleId = "calendarMdCss";
+                    if (!document.getElementById(styleId)) {
+                        var head = document.getElementsByTagName("head")[0];
+                        var css = document.createElement("style");
+                        css.type = "text/css";
+                        css.id = styleId;
+                        css.innerHTML = "/* angular-material-calendar.css */";
+                        head.insertBefore(css, head.firstChild);
+                    }
+                };
 
-    return {
-        restrict: "E",
-        scope: {
-            ngModel: "=?",
-            template: "&",
-            templateUrl: "=?",
-            onDayClick: "=?",
-            onPrevMonth: "=?",
-            onNextMonth: "=?",
-            calendarDirection: "=?",
-            dayContent: "&?",
-            timezone: "=?",
-            titleFormat: "=?",
-            dayFormat: "=?",
-            dayLabelFormat: "=?",
-            dayLabelTooltipFormat: "=?",
-            dayTooltipFormat: "=?",
-            weekStartsOn: "=?",
-            tooltips: "&?",
-            startDateOfMonth: "=?",
-            noOfDays: "=?",
-            clearDataCacheOnLoad: "=?",
-            disableFutureSelection: "=?",
-            disableSelection: "=?"
-        },
-        link: function ($scope, $element, $attrs) {
+                return {
+                    restrict: "E",
+                    scope: {
+                        ngModel: "=?",
+                        template: "&",
+                        templateUrl: "=?",
+                        onDayClick: "=?",
+                        onPrevMonth: "=?",
+                        onNextMonth: "=?",
+                        calendarDirection: "=?",
+                        dayContent: "&?",
+                        timezone: "=?",
+                        titleFormat: "=?",
+                        dayFormat: "=?",
+                        dayLabelFormat: "=?",
+                        dayLabelTooltipFormat: "=?",
+                        dayTooltipFormat: "=?",
+                        weekStartsOn: "=?",
+                        tooltips: "&?",
+                        startDateOfMonth: "=?",
+                        noOfDays: "=?",
+                        clearDataCacheOnLoad: "=?",
+                        disableFutureSelection: "=?",
+                        disableSelection: "=?"
+                    },
+                    link: function ($scope, $element, $attrs) {
 
-            // Add the CSS here.
-            injectCss();
+                        // Add the CSS here.
+                        injectCss();
 
-            var date = new Date();
-            var month = parseInt($attrs.startMonth || date.getMonth());
-            var year = parseInt($attrs.startYear || date.getFullYear());
+                        var date = new Date();
+                        var month = parseInt($attrs.startMonth || date.getMonth());
+                        var year = parseInt($attrs.startYear || date.getFullYear());
 
-            $scope.columnWeekLayout = "column";
-            $scope.weekLayout = "row";
-            $scope.timezone = $scope.timezone || null;
-            $scope.noCache = $attrs.clearDataCacheOnLoad || false;
+                        $scope.columnWeekLayout = "column";
+                        $scope.weekLayout = "row";
+                        $scope.timezone = $scope.timezone || null;
+                        $scope.noCache = $attrs.clearDataCacheOnLoad || false;
 
-            // Parse the parent model to determine if it's an array.
-            // If it is an array, than we'll automatically be able to select
-            // more than one date.
-            if ($attrs.ngModel) {
-                $scope.active = $scope.$parent.$eval($attrs.ngModel);
-                if ($attrs.ngModel) {
-                    $scope.$watch("$parent." + $attrs.ngModel, function (val) {
-                        $scope.active = val;
-                    });
-                }
-            } else {
-                $scope.active = null;
-            }
-
-            // Set the defaults here.
-            $scope.titleFormat = $scope.titleFormat || "LLLL yyyy";
-            $scope.dayLabelFormat = $scope.dayLabelFormat || "EEE";
-            $scope.dayLabelTooltipFormat = $scope.dayLabelTooltipFormat || "EEEE";
-            $scope.dayFormat = $scope.dayFormat || "d";
-            $scope.dayTooltipFormat = $scope.dayTooltipFormat || "fullDate";
-            $scope.dayIdFormat = "dd-MM-yy";
-            $scope.disableFutureSelection = $scope.disableFutureSelection || false;
-            $scope.disableSelection = $scope.disableSelection || false;
-
-            $scope.sameMonth = function (date) {
-                var d = angular.copy(date);
-                return d.getFullYear() === $scope.calendar.year &&
-                    d.getMonth() === $scope.calendar.month;
-            };
-
-            $scope.isDisabled = function (date,startDateOfMonth,noOfDays) {
-                if (noOfDays!=0 && angular.isDefined(noOfDays)) {
-                    var dateStart = new Date($scope.calendar.year,$scope.calendar.month,startDateOfMonth);
-                    var dateEnd = angular.copy(dateStart);
-                    dateEnd.setDate(dateStart.getDate()+parseInt(noOfDays));
-                    if (date.getDate() <= dateStart && date.getDate() >= dateEnd) { return true; }
-                }
-                if ($scope.disableSelection) { return true; }
-                if ($scope.disableFutureSelection && date > new Date()) { return true; }
-                return !$scope.sameMonth(date);
-            };
-
-            $scope.calendarDirection = $scope.calendarDirection || "horizontal";
-
-            $scope.$watch("calendarDirection", function (val) {
-                $scope.weekLayout = val === "horizontal" ? "row" : "column";
-            });
-
-            $scope.$watch("weekLayout", function () {
-                year = $scope.calendar.year;
-                month = $scope.calendar.month;
-                bootstrap();
-            });
-
-            var handleCb = function (cb, data) {
-                (cb || angular.noop)(data);
-            };
-
-            var dateFind = function (arr, date) {
-                var index = -1;
-                angular.forEach(arr, function (d, k) {
-                    if (index < 0) {
-                        if (angular.equals(date, d)) {
-                            index = k;
+                        // Parse the parent model to determine if it"s an array.
+                        // If it is an array, than we"ll automatically be able to select
+                        // more than one date.
+                        if ($attrs.ngModel) {
+                            $scope.active = $scope.$parent.$eval($attrs.ngModel);
+                            if ($attrs.ngModel) {
+                                $scope.$watch("$parent." + $attrs.ngModel, function (val) {
+                                    $scope.active = val;
+                                });
+                            }
+                        } else {
+                            $scope.active = null;
                         }
+
+                        // Set the defaults here.
+                        $scope.titleFormat = $scope.titleFormat || "LLLL yyyy";
+                        $scope.dayLabelFormat = $scope.dayLabelFormat || "EEE";
+                        $scope.dayLabelTooltipFormat = $scope.dayLabelTooltipFormat || "EEEE";
+                        $scope.dayFormat = $scope.dayFormat || "d";
+                        $scope.dayTooltipFormat = $scope.dayTooltipFormat || "fullDate";
+                        $scope.dayIdFormat = "dd-MM-yy";
+                        $scope.disableFutureSelection = $scope.disableFutureSelection || false;
+                        $scope.disableSelection = $scope.disableSelection || false;
+
+                        $scope.sameMonth =  (date) => {
+                            var d = angular.copy(date);
+                            return d.getFullYear() === $scope.calendar.year &&
+                                d.getMonth() === $scope.calendar.month;
+                        };
+
+                        $scope.isDisabled = (date,startDateOfMonth,noOfDays) => {
+                            if (noOfDays !== 0 && angular.isDefined(noOfDays)) {
+                                var dateStart =
+                                    new Date(
+                                        $scope.calendar.year,
+                                        $scope.calendar.month,startDateOfMonth
+                                    );
+                                var dateEnd = angular.copy(dateStart);
+                                dateEnd.setDate(dateStart.getDate() + parseInt(noOfDays));
+                                if (date.getDate() <= dateStart && date.getDate() >= dateEnd) {
+                                    return true;
+                                }
+                            }
+                            if ($scope.disableSelection) {
+                                return true;
+                            }
+                            if ($scope.disableFutureSelection && date > new Date()) {
+                                return true;
+                            }
+                            return !$scope.sameMonth(date);
+                        };
+
+                        $scope.calendarDirection = $scope.calendarDirection || "horizontal";
+
+                        $scope.$watch("calendarDirection", function (val) {
+                            $scope.weekLayout = val === "horizontal" ? "row" : "column";
+                        });
+
+                        $scope.$watch("weekLayout", function () {
+                            year = $scope.calendar.year;
+                            month = $scope.calendar.month;
+                            bootstrap();
+                        });
+
+                        var handleCb = (cb, data) => (cb || angular.noop)(data);
+
+                        var dateFind = (arr, date) => {
+                            var index = -1;
+                            angular.forEach(arr, (d, k) => {
+                                if (index < 0) {
+                                    if (angular.equals(date, d)) {
+                                        index = k;
+                                    }
+                                }
+                            });
+                            return index;
+                        };
+
+                        $scope.isActive = (date) => {
+                            var match;
+                            var active = angular.copy($scope.active);
+                            if (!angular.isArray(active)) {
+                                if (
+                                    active &&
+                                    angular.equals(active.getYear(), date.getYear()) &&
+                                    angular.equals(active.getMonth(), date.getMonth()) &&
+                                    angular.equals(active.getDate(), date.getDate())
+                                ) {
+                                    match = true;
+                                }
+                            } else {
+                                match = dateFind(active, date) > -1;
+                            }
+                            return match;
+                        };
+
+                        $scope.hasEvents = (date) => {
+                            var data = CalendarData.data[$scope.dayKey(date)];
+                            return (data && data.length > 0);
+                        };
+
+                        $scope.prev = () => {
+                            $scope.calendar.prev();
+                            var data = {
+                                year: $scope.calendar.year,
+                                month: $scope.calendar.month + 1
+                            };
+                            setData();
+                            handleCb($scope.onPrevMonth, data);
+                        };
+
+                        $scope.next = () => {
+                            $scope.calendar.next();
+                            var data = {
+                                year: $scope.calendar.year,
+                                month: $scope.calendar.month + 1
+                            };
+                            setData();
+                            handleCb($scope.onNextMonth, data);
+                        };
+
+                        $scope.handleDayClick = (date) => {
+
+                            if ($scope.disableFutureSelection && date > new Date()) {
+                                return;
+                            }
+
+                            if ($scope.disableSelection) {
+                                return;
+                            }
+
+                            var active = angular.copy($scope.active);
+                            if (angular.isArray(active)) {
+                                var idx = dateFind(active, date);
+                                if (idx > -1) {
+                                    active.splice(idx, 1);
+                                } else {
+                                    active.push(date);
+                                }
+                            } else {
+                                if (angular.equals(active, date)) {
+                                    active = null;
+                                } else {
+                                    active = date;
+                                }
+                            }
+
+                            $scope.active = active;
+                            if ($attrs.ngModel) {
+                                $parse($attrs.ngModel)
+                                    .assign(
+                                        $scope.$parent,
+                                        angular.copy($scope.active)
+                                    );
+                            }
+                            handleCb($scope.onDayClick, angular.copy(date));
+                        };
+
+                        // Small helper function to set the contents of the template.
+                        var setTemplate = (contents) => {
+                            $element.html(contents);
+                            $compile($element.contents())($scope);
+                        };
+
+                        var init = () => {
+
+                            $scope.calendar = new Calendar(year, month, {
+                                weekStartsOn: $scope.weekStartsOn || 0,
+                                startDateOfMonth: $scope.startDateOfMonth || 1,
+                                noOfDays: $scope.noOfDays || 0
+                            });
+                            // Allows fetching of dynamic templates via $templateCache.
+                            if ($scope.templateUrl) {
+                                return $templateRequest($scope.templateUrl);
+                            }
+                            return $q.when($scope.template() || defaultTemplate);
+                        };
+
+                        $scope.dataService = CalendarData;
+
+                        // Set the html contents of each date.
+                        var getDayKey = (date) => {
+                            return $scope.dataService.getDayKey(date);
+                        };
+                        $scope.dayKey = getDayKey;
+
+                        var getDayContent = (date) => {
+
+                            // Initialize the data in the data array.
+                            if ($scope.noCache) {
+                                $scope.dataService.setDayContent(date, "");
+                            } else {
+                                $scope
+                                    .dataService
+                                    .setDayContent(
+                                        date,
+                                        ($scope.dataService.data[getDayKey(date)] || "")
+                                    );
+                            }
+
+                            var cb = ($scope.dayContent || angular.noop)();
+                            var result = (cb || angular.noop)(date);
+
+                            // Check for async function. This should support $http.get() and also regular $q.defer() functions.
+                            if (angular.isObject(result) && "function" === typeof result.success) {
+                                result.success(function (html) {
+                                    $scope.dataService.setDayContent(date, html);
+                                });
+                            } else if (
+                                angular.isObject(result) &&
+                                "function" === typeof result.then
+                            ) {
+                                result.then(function (html) {
+                                    $scope.dataService.setDayContent(date, html);
+                                });
+                            } else {
+                                $scope.dataService.setDayContent(date, result);
+                            }
+
+                        };
+
+                        var setData = function () {
+                            angular.forEach($scope.calendar.weeks, function (week) {
+                                angular.forEach(week, getDayContent);
+                            });
+                        };
+
+                        window.data = $scope.data;
+
+                        var bootstrap = () => {
+                            init().then((contents) => {
+                                setTemplate(contents);
+                                setData();
+                            });
+                        };
+
+                        $scope
+                            .$watchGroup([
+                                "weekStartsOn",
+                                "startDateOfMonth",
+                                "noOfDays"
+                            ], init);
+                        bootstrap();
+
+                        // These are for tests, don"t remove them..
+                        $scope._$$init = init;
+                        $scope._$$setTemplate = setTemplate;
+                        $scope._$$bootstrap = bootstrap;
+
                     }
-                });
-                return index;
-            };
-
-            $scope.isActive = function (date) {
-                var match;
-                var active = angular.copy($scope.active);
-                if (!angular.isArray(active)) {
-                    if (active && angular.equals(active.getYear(), date.getYear()) && angular.equals(active.getMonth(), date.getMonth()) && angular.equals(active.getDate(), date.getDate())) {
-                        match = true;
-                    }
-                } else {
-                    match = dateFind(active, date) > -1;
-                }
-                return match;
-            };
-
-            $scope.hasEvents = function (date) {
-                var data = CalendarData.data[$scope.dayKey(date)];
-                return (data && data.length > 0);
-            };
-
-            $scope.prev = function () {
-                $scope.calendar.prev();
-                var data = {
-                    year: $scope.calendar.year,
-                    month: $scope.calendar.month + 1
                 };
-                setData();
-                handleCb($scope.onPrevMonth, data);
-            };
 
-            $scope.next = function () {
-                $scope.calendar.next();
-                var data = {
-                    year: $scope.calendar.year,
-                    month: $scope.calendar.month + 1
-                };
-                setData();
-                handleCb($scope.onNextMonth, data);
-            };
-
-            $scope.handleDayClick = function (date) {
-
-                if($scope.disableFutureSelection && date > new Date()) {
-                    return;
-                }
-
-                if($scope.disableSelection) {
-                    return;
-                }
-
-                var active = angular.copy($scope.active);
-                if (angular.isArray(active)) {
-                    var idx = dateFind(active, date);
-                    if (idx > -1) {
-                        active.splice(idx, 1);
-                    } else {
-                        active.push(date);
-                    }
-                } else {
-                    if (angular.equals(active, date)) {
-                        active = null;
-                    } else {
-                        active = date;
-                    }
-                }
-
-                $scope.active = active;
-                if ($attrs.ngModel) {
-                    $parse($attrs.ngModel).assign($scope.$parent, angular.copy($scope.active));
-                }
-
-                handleCb($scope.onDayClick, angular.copy(date));
-
-            };
-
-            // Small helper function to set the contents of the template.
-            var setTemplate = function (contents) {
-                $element.html(contents);
-                $compile($element.contents())($scope);
-            };
-
-            var init = function () {
-
-                $scope.calendar = new Calendar(year, month, {
-                    weekStartsOn: $scope.weekStartsOn || 0,
-                    startDateOfMonth: $scope.startDateOfMonth || 1,
-                    noOfDays: $scope.noOfDays || 0
-                });
-
-                // Allows fetching of dynamic templates via $templateCache.
-                if ($scope.templateUrl) {
-                    return $templateRequest($scope.templateUrl);
-                }
-
-                return $q.when($scope.template() || defaultTemplate);
-            };
-
-
-
-
-            $scope.dataService = CalendarData;
-
-            // Set the html contents of each date.
-            var getDayKey = function (date) {
-                return $scope.dataService.getDayKey(date);
-            };
-            $scope.dayKey = getDayKey;
-
-            var getDayContent = function (date) {
-
-                // Initialize the data in the data array.
-                if ($scope.noCache) {
-                    $scope.dataService.setDayContent(date, "");
-                } else {
-                    $scope.dataService.setDayContent(date, ($scope.dataService.data[getDayKey(date)] || ""));
-                }
-
-                var cb = ($scope.dayContent || angular.noop)();
-                var result = (cb || angular.noop)(date);
-
-                // Check for async function. This should support $http.get() and also regular $q.defer() functions.
-                if (angular.isObject(result) && "function" === typeof result.success) {
-                    result.success(function (html) {
-                        $scope.dataService.setDayContent(date, html);
-                    });
-                } else if (angular.isObject(result) && "function" === typeof result.then) {
-                    result.then(function (html) {
-                        $scope.dataService.setDayContent(date, html);
-                    });
-                } else {
-                    $scope.dataService.setDayContent(date, result);
-                }
-
-            };
-
-            var setData = function () {
-                angular.forEach($scope.calendar.weeks, function (week) {
-                    angular.forEach(week, getDayContent);
-                });
-            };
-
-            window.data = $scope.data;
-
-            var bootstrap = function () {
-                init().then(function (contents) {
-                    setTemplate(contents);
-                    setData();
-                });
-            };
-
-            $scope.$watchGroup(["weekStartsOn","startDateOfMonth","noOfDays"], init);
-            bootstrap();
-
-            // These are for tests, don't remove them..
-            $scope._$$init = init;
-            $scope._$$setTemplate = setTemplate;
-            $scope._$$bootstrap = bootstrap;
-
-        }
-    };
-
-}]);
+            }
+        ]
+    );
